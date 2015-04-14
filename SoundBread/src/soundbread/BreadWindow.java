@@ -22,13 +22,19 @@ public class BreadWindow extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	
+	// TODO:
+	// auto mode to load first x files in dir
+	// save config in a file to load later
+	// get it to play sounds
+	// try to get different file formats in the works
+	
 	// Settings / parameters for window
 //	private boolean autoMode = false;
 	private int rows = 4;
 	private int cols = 4;
 	private int buttonGridOffsetX = 0;
 	private int buttonGridOffsetY = 1;
-	private String windowName = "SoundBread ver. 0.1";
+	private String windowName = "SoundBread ver. 0.2";
 	private String currentDirPath = "";
 	private File currentDir;
 	private GridBagLayout layout;
@@ -146,7 +152,6 @@ public class BreadWindow extends JFrame {
 		// Go live
 		panel.setVisible(true);
 		//this.pack();
-		// Noice locations bruh
 		this.setLocation(dim.width/2 - this.getSize().width/2, (int)(dim.width/2.5) - this.getSize().width/2);
 		this.setVisible(true);
 		
@@ -170,6 +175,7 @@ public class BreadWindow extends JFrame {
 		// TODO Auto-generated constructor stub
 	}
 	
+	// Begin non-default methods
 	public String getCurrentDirPath() {
 		return currentDirPath;
 	}
@@ -180,5 +186,5 @@ public class BreadWindow extends JFrame {
 		System.out.println(theSound.getAbsolutePath());
 		
 	}
-	
+	// End non-default methods
 }

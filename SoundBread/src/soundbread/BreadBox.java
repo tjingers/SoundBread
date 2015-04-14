@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 
+import javax.sound.sampled.*;
 import javax.swing.*;
 
 /**
@@ -47,6 +48,27 @@ public class BreadBox extends Container {
 			public void actionPerformed(ActionEvent arg0) {
 				// This should be listening for a click, really. 
 				System.out.println("Button clicked or action'd at X: " + x + " Y: " + y);
+				// Implement the thing where we play a clip
+				// Works right now, only tested, and i believe will only work for a .wav
+				if (myFile == null) {
+					System.out.println("File not initialized for this button");
+					return;
+				}
+				if (!myFile.exists()) {
+					System.out.println("File not found to play for this button");
+					return;
+				}
+				try {
+					Clip clip = AudioSystem.getClip();
+					System.out.println("Trying to load the file at: " + myFile.getAbsolutePath());
+					AudioInputStream inputStream = AudioSystem.getAudioInputStream(myFile);
+					clip.open(inputStream);
+					clip.start();
+				} catch (LineUnavailableException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				
 			}
 		});
