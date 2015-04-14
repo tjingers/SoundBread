@@ -9,6 +9,12 @@ import java.awt.*;
 //import javax.swing.JTextField;
 import javax.swing.*;
 
+/**
+ * Main - Pretty basic launcher class for the BreadWindow
+ * 
+ * @author Tanner Ingersoll
+ *
+ */
 public class Main {
 
 	// Window

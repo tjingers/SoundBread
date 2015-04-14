@@ -6,10 +6,18 @@ import java.io.File;
 
 import javax.swing.*;
 
+/**
+ * BreadBox - Convenient Container for the JButton and JTextfield needed for each element to the sound board.
+ * 
+ * Stores the file associated with this button, and handles the button presses and text entering stuff.
+ * 
+ * @author Tanner Ingersoll
+ *
+ */
 public class BreadBox extends Container {
 
 	/**
-	 * 
+	 * I don't even know
 	 */
 	private static final long serialVersionUID = 1L;
 	
@@ -31,7 +39,19 @@ public class BreadBox extends Container {
 		x = X;
 		y = Y;
 		myWindow = window;
-		myButton = new JButton("Click me fool");
+		
+		// Button setup
+		myButton = new JButton("Click me");
+		myButton.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// This should be listening for a click, really. 
+				System.out.println("Button clicked or action'd at X: " + x + " Y: " + y);
+				
+			}
+		});
+		
+		// Textfield setup
 		myField = new JTextField();
 		myField.addActionListener( new ActionListener() {
 			@Override
@@ -53,6 +73,7 @@ public class BreadBox extends Container {
 				}
 			}
 		});
+		
 		layout = new GridBagLayout();
 		gbc = new GridBagConstraints();
 		

@@ -9,6 +9,12 @@ import soundbread.TextPrompt.Show;
 
 import java.io.*;
 
+/**
+ * BreadWindow - The heart and soul of the sound board
+ * 
+ * @author Tanner Ingersoll
+ *
+ */
 public class BreadWindow extends JFrame {
 
 	/**
@@ -18,8 +24,8 @@ public class BreadWindow extends JFrame {
 	
 	// Settings / parameters for window
 //	private boolean autoMode = false;
-	private int rows = 6;
-	private int cols = 6;
+	private int rows = 4;
+	private int cols = 4;
 	private int buttonGridOffsetX = 0;
 	private int buttonGridOffsetY = 1;
 	private String windowName = "SoundBread ver. 0.1";
@@ -65,7 +71,6 @@ public class BreadWindow extends JFrame {
 		topBarC.weighty = .5;
 
 		// Set up the directory box and label, and button in topBar
-		//TODO: fix the button nonsense
 		dirLabel = new JLabel("No current dir");
 		directoryField = new JTextField();
 		directoryBox = new TextPrompt("Enter Dir", directoryField);
@@ -89,16 +94,21 @@ public class BreadWindow extends JFrame {
 			}
 		} );
 
+		// Format and add components to top bar
 		topBarC.gridx = 0;
 		topBarC.gridy = 0;
+		topBarC.weightx = 0.4;
 		topBar.add(dirLabel, topBarC);
 
 		topBarC.gridx = 1;
+		topBarC.weightx = 1.0;
 		topBar.add(directoryField, topBarC);
 
 		topBarC.gridx = 2;
+		topBarC.weightx = 0.2;
 		topBar.add(loadDirectory, topBarC);
 
+		// Add top bar to panel
 		c.gridx = 0;
 		c.gridy = 0;
 		c.fill = GridBagConstraints.BOTH;
@@ -106,8 +116,7 @@ public class BreadWindow extends JFrame {
 		c.weighty = 0.1;
 		panel.add(topBar, c);
 		
-		// grid
-		
+		// Format and add components to the grid
 		grid = new Container();
 		grid.setLayout(new GridBagLayout());
 		gridC = new GridBagConstraints();	
@@ -129,6 +138,7 @@ public class BreadWindow extends JFrame {
 			}// for j, cols
 		} // for i, rows
 		
+		// Add grid to panel
 		c.gridy = 1;
 		c.weighty = 1.0;
 		panel.add(grid, c);
