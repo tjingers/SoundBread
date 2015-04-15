@@ -3,8 +3,14 @@ package soundbread;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+//import java.io.IOException;
+//import java.net.MalformedURLException;
+import java.net.URI;
 
-import javax.sound.sampled.*;
+//import javafx.scene.*;
+import javafx.scene.media.*;
+
+//import javax.sound.sampled.*;
 import javax.swing.*;
 
 import soundbread.TextPrompt.Show;
@@ -13,6 +19,8 @@ import soundbread.TextPrompt.Show;
  * BreadBox - Convenient Container for the JButton and JTextfield needed for each element to the sound board.
  * 
  * Stores the file associated with this button, and handles the button presses and text entering stuff.
+ * 
+ * 4/15/2015 *New* - Has a JFXPanel to allow for the new usage of JFX
  * 
  * @author Tanner Ingersoll
  *
@@ -36,6 +44,9 @@ public class BreadBox extends Container {
 	private GridBagLayout layout;
 	private GridBagConstraints gbc;
 	
+	// i don't know if these are ok or not but we have them to solve problems
+	BreadBox thisBox = this;
+	
 	public BreadBox(int X, int Y, BreadWindow window) {
 		// Constructor
 		
@@ -45,14 +56,16 @@ public class BreadBox extends Container {
 		myWindow = window;
 		
 		// Button setup
-		myButton = new JButton("Click me");
+		myButton = new JButton("None");
+		
 		myButton.addActionListener( new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				// TODO: redo this to the proper media player (javafx)
 				// This should be listening for a click, really. 
 				System.out.println("Button clicked or action'd at X: " + x + " Y: " + y);
-				// Implement the thing where we play a clip
-				// Works right now, only tested, and i believe will only work for a .wav
+				
+				// Find the file for the button and make sure it's real
 				if (myFile == null) {
 					System.out.println("File not initialized for this button");
 					return;
@@ -61,17 +74,10 @@ public class BreadBox extends Container {
 					System.out.println("File not found to play for this button");
 					return;
 				}
-				try {
-					Clip clip = AudioSystem.getClip();
-					System.out.println("Trying to load the file at: " + myFile.getAbsolutePath());
-					AudioInputStream inputStream = AudioSystem.getAudioInputStream(myFile);
-					clip.open(inputStream);
-					clip.start();
-				} catch (LineUnavailableException e) {
-					e.printStackTrace();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				
+				// Actual playing audio part
+				playFile(myFile);
+				thisBox.myButton.setBackground(Color.GREEN);
 				
 			}
 		});
@@ -134,4 +140,42 @@ public class BreadBox extends Container {
 		
 	}
 
+	public JButton getButton() {
+		return myButton;
+	}
+	
+	public void playFile(File f) {
+		Media media = null;
+		MediaPlayer mPlayer;
+		URI uri;
+		
+		// Generate a URI and create Media for the file in question
+		try {
+			uri = f.toURI();
+			media = new Media(uri.toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		// Give playing it a shot
+		// TODO: try to handle incorrect formats here, instead of having it throw an exception
+		if (media != null) {
+			mPlayer = new MediaPlayer(media);
+			System.out.println("Playing media...");
+			System.out.println("Volume: " + mPlayer.getVolume());
+			mPlayer.setOnEndOfMedia( new Runnable() {
+				@Override
+				public void run() {
+					// Remove this media from the window's thoughts and memories
+					System.out.println("Media finished playing");
+					myWindow.removeMedia(mPlayer);
+					thisBox.myButton.setBackground(null);
+				}
+			});
+			mPlayer.play();
+			myWindow.addMedia(mPlayer);
+		}
+		
+	}
+	
 }

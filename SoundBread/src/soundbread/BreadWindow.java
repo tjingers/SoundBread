@@ -1,8 +1,13 @@
 package soundbread;
 
+import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.*;
 
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.media.MediaPlayer;
+
+//import javax.sound.sampled.Clip;
 import javax.swing.*;
 
 import soundbread.TextPrompt.Show;
@@ -31,13 +36,16 @@ public class BreadWindow extends JFrame {
 	// browse dialog for finding the directory
 	// real time grid size change maybe
 	// Maybe make it so you can sample from the mic to make clips yourself?
+	// DONE - add the STOP button
+	// Add drag and drop to buttons
 	
 	// Settings / parameters for window
 	private boolean autoMode = true;
 	private int rows = 8;
 	private int cols = 12;
-	private int buttonGridOffsetX = 0;
-	private int buttonGridOffsetY = 1;
+	// No longer needed since we have a separate panel for the BreadBoxes
+//	private int buttonGridOffsetX = 0;
+//	private int buttonGridOffsetY = 1;
 	private String windowName = "SoundBread ver. 0.2";
 	private String currentDirPath = "";
 	private File currentDir;
@@ -47,16 +55,18 @@ public class BreadWindow extends JFrame {
 	private Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 	
 	// Components
-	private Container panel;
+	private JFXPanel panel;
 	private Container topBar;
 	private Container grid;
 	private TextPrompt directoryBox;
 	private JTextField directoryField;
 	private JButton loadDirectory;
 	private JButton openChooser;
+	private JButton stopAll;
 	private JLabel dirLabel;
 	private JCheckBox autoBox;
 	private JFileChooser dirChooser;
+	private ArrayList<MediaPlayer> clips;
 	private BreadBox[][] fields;
 
 	public BreadWindow() throws HeadlessException {
@@ -68,8 +78,9 @@ public class BreadWindow extends JFrame {
 		this.setTitle(windowName);
 
 		// Set up members
-		panel = this.getContentPane();
+		panel = new JFXPanel();
 		fields = new BreadBox[rows][cols];
+		clips = new ArrayList<MediaPlayer>();
 		layout = new GridBagLayout();
 		gbc = new GridBagConstraints();
 		panel.setLayout(layout);
@@ -92,7 +103,7 @@ public class BreadWindow extends JFrame {
 		directoryBox.changeAlpha(0.50f);
 		directoryBox.setShow(Show.FOCUS_LOST);
 		
-		loadDirectory = new JButton("Load dir");
+		loadDirectory = new JButton("Load entered dir");
 		// Gross disgusting code for this button, maybe it will work idk
 		loadDirectory.addActionListener( new ActionListener() {
 			@Override
@@ -131,7 +142,26 @@ public class BreadWindow extends JFrame {
 						loadDirToGrid(currentDir);
 					}
 					System.out.println("Opened a directory with the chooser at: " + currentDir.getAbsolutePath());
+					if (currentDir.exists()) {
+						System.out.println("And it's a real directory");
+					}
 				} 
+			}
+		});
+		
+		stopAll = new JButton("Stop all media");
+		stopAll.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Stop all of the clips that exist
+				if (!clips.isEmpty()) {
+					System.out.println("Stopping all clips...");
+					stopAllClips();
+					System.out.println("Stopped.");
+				} else {
+					System.out.println("There are no clips to stop.");
+				}
+				
 			}
 		});
 		
@@ -152,7 +182,7 @@ public class BreadWindow extends JFrame {
 		
 		// Format and add components to top bar
 		topBarC.gridx = 0;
-		topBarC.gridy = 0;
+		topBarC.gridy = 1;
 		topBarC.weightx = 0.4;
 		topBar.add(dirLabel, topBarC);
 
@@ -161,6 +191,11 @@ public class BreadWindow extends JFrame {
 		topBar.add(directoryField, topBarC);
 
 		topBarC.gridx = 2;
+		topBarC.weightx = 0.2;
+		topBar.add(stopAll, topBarC);
+		
+		topBarC.gridx = 2;
+		topBarC.gridy = 0;
 		topBarC.weightx = 0.2;
 		topBar.add(loadDirectory, topBarC);
 		
@@ -177,7 +212,7 @@ public class BreadWindow extends JFrame {
 		gbc.gridy = 0;
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.weightx = 1.0;
-		gbc.weighty = 0.1;
+		gbc.weighty = 0.05;
 		panel.add(topBar, gbc);
 		
 		// Format and add components to the grid
@@ -201,9 +236,10 @@ public class BreadWindow extends JFrame {
 		panel.add(grid, gbc);
 		
 		// Go live
+		this.add(panel);
 		panel.setVisible(true);
 		//this.pack();
-		this.setLocation(dim.width/2 - this.getSize().width/2, (int)(dim.width/2.5) - this.getSize().width/2);
+		this.setLocation(dim.width/2 - this.getSize().width/2, (int)(dim.width/3.5) - this.getSize().width/2);
 		this.setVisible(true);
 		
 		// Welcome message
@@ -231,30 +267,42 @@ public class BreadWindow extends JFrame {
 		return currentDirPath;
 	}
 	
-	public void playSound(String path) {
-		File theSound = null;
-		theSound = new File(path);
-		System.out.println(theSound.getAbsolutePath());
-		
+	private void loadDirToGrid(File dir) {
+		// Load files from the directory that are either .mp3 or .wav into BreadBoxes
+		File[] inDir = dir.listFiles();
+		int k = 0;
+		for (BreadBox[] bRow:fields) {
+			for (BreadBox b:bRow) {
+				if (inDir.length > k) {
+					if (inDir[k].getName().endsWith(".mp3") || inDir[k].getName().endsWith(".wav")) {
+						System.out.println("Loaded a file: " + inDir[k].getName());
+						b.setFile(inDir[k]);
+					} 
+					k++;
+				} else {
+					b.getButton().setText("None");
+					b.setFile(null);
+				}
+				
+			}
+		}
 	}
 	
-	private void loadDirToGrid(File dir) {
-		//if (autoMode) {
-			File[] inDir = currentDir.listFiles();
-			int k = 0;
-			for (BreadBox[] bRow:fields) {
-				for (BreadBox b:bRow) {
-					if (inDir.length > k) {
-						if (inDir[k].getName().endsWith(".wav")) {
-							System.out.println("Loaded a file: " + inDir[k].getName());
-							b.setFile(inDir[k]);
-							k++;
-						}
-					}
-				}
-			}	
-		//}
-		
+	// Allows the media to self-regulate if they so decide to behave
+	public void addMedia(MediaPlayer m) {
+		clips.add(m);
+	}
+	
+	public void removeMedia(MediaPlayer m) {
+		clips.remove(m);
+		System.out.println("Media removed from media array");
+	}
+	
+	public void stopAllClips() {
+		for (MediaPlayer c:clips) {
+			c.stop();
+		}
+		clips.clear();
 	}
 	// End non-default methods
 }
