@@ -7,6 +7,8 @@ import java.io.File;
 import javax.sound.sampled.*;
 import javax.swing.*;
 
+import soundbread.TextPrompt.Show;
+
 /**
  * BreadBox - Convenient Container for the JButton and JTextfield needed for each element to the sound board.
  * 
@@ -29,6 +31,7 @@ public class BreadBox extends Container {
 	private File myFile = null;
 	private BreadWindow myWindow = null;
 	private JButton myButton = null;
+	private TextPrompt myFieldBox = null;
 	private JTextField myField = null;
 	private GridBagLayout layout;
 	private GridBagConstraints gbc;
@@ -95,6 +98,9 @@ public class BreadBox extends Container {
 				}
 			}
 		});
+		myFieldBox = new TextPrompt("Enter filename", myField);
+		myFieldBox.changeAlpha(0.50f);
+		myFieldBox.setShow(Show.FOCUS_LOST);
 		
 		layout = new GridBagLayout();
 		gbc = new GridBagConstraints();
@@ -107,9 +113,24 @@ public class BreadBox extends Container {
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		this.add(myButton, gbc);
-		gbc.weighty = 0.3;
+		gbc.weighty = 0.1;
 		gbc.gridy = 1;
 		this.add(myField, gbc);
+		
+	}
+	
+	public void setFile(File newFile) {
+		// Method to allow manually setting the file in the box without having to enter path
+		// Mostly for the auto-mode
+		if (newFile == null) {
+			return;
+		}
+		if (newFile.exists()) {
+			myFile = newFile;
+			myField.setText("");
+			myButton.setText(newFile.getName());
+			myButton.setToolTipText(newFile.getName());
+		}
 		
 	}
 
