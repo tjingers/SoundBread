@@ -7,6 +7,7 @@ import java.awt.event.*;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.media.MediaPlayer;
 
+
 //import javax.sound.sampled.Clip;
 import javax.swing.*;
 
@@ -28,12 +29,9 @@ public class BreadWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
 	// TODO:
-	// DONE - auto mode to load first x files in dir
-	// save config in a file to load later
-	// DONE - get it to play sounds 
-	// try to get different file formats in the works
+	// save config in a file to load later 
+	// DONE - JavaFX supports more types - try to get different file formats in the works
 	// Pages of buttons
-	// browse dialog for finding the directory
 	// real time grid size change maybe
 	// Maybe make it so you can sample from the mic to make clips yourself?
 	// DONE - add the STOP button
@@ -63,6 +61,7 @@ public class BreadWindow extends JFrame {
 	private JButton loadDirectory;
 	private JButton openChooser;
 	private JButton stopAll;
+	private JButton clearAll;
 	private JLabel dirLabel;
 	private JCheckBox autoBox;
 	private JFileChooser dirChooser;
@@ -95,7 +94,7 @@ public class BreadWindow extends JFrame {
 		topBarC.weightx = 1.0;
 		topBarC.weighty = .5;
 
-		// Set up the directory box, label, checkbox, open choooser, and button in topBar
+		// Set up the directory box, label, checkbox, open choooser, clear all, and load dir button in topBar
 		dirLabel = new JLabel("No current dir");
 		directoryField = new JTextField();
 		
@@ -165,6 +164,17 @@ public class BreadWindow extends JFrame {
 			}
 		});
 		
+		clearAll = new JButton("Clear all media");
+		clearAll.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// invoke the loadDir with null to clear grid
+				System.out.println("Clearing all media from grid...");
+				loadDirToGrid(null);
+				//stopAllClips();
+			}
+		});
+		
 		autoBox = new JCheckBox("Auto load files");
 		autoBox.setSelected(autoMode);
 		autoBox.addActionListener( new ActionListener() {
@@ -193,6 +203,9 @@ public class BreadWindow extends JFrame {
 		topBarC.gridx = 2;
 		topBarC.weightx = 0.2;
 		topBar.add(stopAll, topBarC);
+		
+		topBarC.gridx = 3;
+		topBar.add(clearAll, topBarC);
 		
 		topBarC.gridx = 2;
 		topBarC.gridy = 0;
@@ -269,7 +282,13 @@ public class BreadWindow extends JFrame {
 	
 	private void loadDirToGrid(File dir) {
 		// Load files from the directory that are either .mp3 or .wav into BreadBoxes
-		File[] inDir = dir.listFiles();
+		File[] inDir;
+		// Made it null-safe, so also able to clear the whole grid (null argument)
+		if (dir != null) {
+			inDir = dir.listFiles();
+		} else {
+			inDir = new File[0];
+		}
 		int k = 0;
 		for (BreadBox[] bRow:fields) {
 			for (BreadBox b:bRow) {
@@ -278,9 +297,11 @@ public class BreadWindow extends JFrame {
 						System.out.println("Loaded a file: " + inDir[k].getName());
 						b.setFile(inDir[k]);
 					} 
+					b.getButton().setBackground(null);
 					k++;
 				} else {
 					b.getButton().setText("None");
+					b.getButton().setBackground(null);
 					b.setFile(null);
 				}
 				
@@ -303,6 +324,13 @@ public class BreadWindow extends JFrame {
 			c.stop();
 		}
 		clips.clear();
+		// To make sure the colors go back to normal, since it's difficult to think of 
+		// 	how I could get a handle on what BreadBox played that media.
+		for (BreadBox[] bRow:fields) {
+			for (BreadBox b:bRow) {
+				b.getButton().setBackground(null);
+			}
+		}
 	}
 	// End non-default methods
 }

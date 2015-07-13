@@ -76,8 +76,9 @@ public class BreadBox extends Container {
 				}
 				
 				// Actual playing audio part
-				playFile(myFile);
-				thisBox.myButton.setBackground(Color.GREEN);
+				if (playFile(myFile)) {
+					thisBox.myButton.setBackground(Color.GREEN);
+				}
 				
 			}
 		});
@@ -144,7 +145,7 @@ public class BreadBox extends Container {
 		return myButton;
 	}
 	
-	public void playFile(File f) {
+	public boolean playFile(File f) {
 		Media media = null;
 		MediaPlayer mPlayer;
 		URI uri;
@@ -153,6 +154,10 @@ public class BreadBox extends Container {
 		try {
 			uri = f.toURI();
 			media = new Media(uri.toString());
+		} catch (MediaException e) {
+			System.out.println("Media exception, unspoorted File type");
+			thisBox.getButton().setBackground(Color.RED);
+			return false;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -174,8 +179,9 @@ public class BreadBox extends Container {
 			});
 			mPlayer.play();
 			myWindow.addMedia(mPlayer);
+			return true;
 		}
-		
+		return false;
 	}
 	
 }
